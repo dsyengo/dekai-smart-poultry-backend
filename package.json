@@ -1,0 +1,20 @@
+{
+  "name": "smart-poultry-backend",
+  "version": "1.0.0",
+  "description": "API endpoints and backend",
+  "homepage": "https://github.com/dsyengo/dekai-smart-poultry-backend#readme",
+  "bugs": {
+    "url": "https://github.com/dsyengo/dekai-smart-poultry-backend/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dsyengo/dekai-smart-poultry-backend.git"
+  },
+  "license": "ISC",
+  "author": "Master Chief",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "test": "npm run test"
+  }
+}
