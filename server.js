@@ -6,6 +6,10 @@ import morgan from 'morgan';
 import cors from 'cors'
 import { connectDB } from './config/db-connection.js';
 import authRoutes from './routes/authRoutes.js'
+import farmRoutes from './routes/farmRoutes.js'
+import diseaseHistoryRoutes from "./routes/diseaseHistoryRoutes.js";
+import analysisRoutes from './routes/analysisRoutes.js'
+
 
 dotenv.config()
 
@@ -37,6 +41,13 @@ app.get('/', (req, res) => {
 //routes
 // 1. Auth Routes
 app.use('/api/v1/auth', authRoutes);
+//2.Farm data routes
+app.use("/api/v1/farms", farmRoutes);
+//3. Analysis routes
+app.use('/api/v1/analysis', analysisRoutes)
+//4. History and reports
+app.use("/api/v1/disease-history", diseaseHistoryRoutes);
+
 
 
 
