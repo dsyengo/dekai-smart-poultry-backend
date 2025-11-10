@@ -1,11 +1,12 @@
+// models/Farm.js
 import mongoose from "mongoose";
 
 const farmSchema = new mongoose.Schema(
     {
-        // 🔹 Farmer reference (link to the user who owns the farm)
+        // 🔹 Farmer reference
         farmerId: {
             type: mongoose.Schema.Types.ObjectId,
-            ref: "User",
+            ref: "users",
             required: true,
         },
 
@@ -14,15 +15,6 @@ const farmSchema = new mongoose.Schema(
             type: String,
             required: true,
             trim: true,
-        },
-        dateRegistered: {
-            type: Date,
-            default: Date.now,
-        },
-        status: {
-            type: String,
-            enum: ["active", "inactive"],
-            default: "active",
         },
 
         // 🔹 Location Information
@@ -63,50 +55,12 @@ const farmSchema = new mongoose.Schema(
         litterManagement: { type: String },
         ventilationQuality: { type: String },
 
-        // 🔹 IoT Device Info (Optional)
-        iotDevice: {
-            deviceId: { type: String },
-            deviceName: { type: String },
-            activationKey: { type: String },
-            lastSync: { type: Date },
-            sensors: [
-                {
-                    type: {
-                        type: String, // e.g., temperature, humidity, ammonia
-                    },
-                    latestValue: Number,
-                    unit: String,
-                    lastUpdated: Date,
-                },
-            ],
-        },
-
-        // 🔹 Farm Performance Metrics
-        averageTemperature: { type: Number },
-        averageHumidity: { type: Number },
-        feedConsumptionRate: { type: Number },
-        eggProductionRate: { type: Number },
-        growthRate: { type: Number },
-        healthStatus: { type: String },
-
-        // 🔹 Alerts and Notifications
-        alertPreferences: {
-            type: String,
-            enum: ["SMS", "WhatsApp", "App"],
-            default: "App",
-        },
-        lastAlertSent: { type: Date },
-        criticalAlerts: [
-            {
-                title: String,
-                message: String,
-                createdAt: { type: Date, default: Date.now },
-            },
-        ],
-
         // 🔹 Metadata
         createdAt: { type: Date, default: Date.now },
         updatedAt: { type: Date, default: Date.now },
+
+        // 🔹 Flag for data completeness
+        isDataFilled: { type: Boolean, default: false },
     },
     {
         timestamps: true, // auto-manages createdAt & updatedAt

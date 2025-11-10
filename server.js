@@ -42,7 +42,7 @@ app.get('/', (req, res) => {
 // 1. Auth Routes
 app.use('/api/v1/auth', authRoutes);
 //2.Farm data routes
-app.use("/api/v1/farms", farmRoutes);
+app.use("/api/v1/farm", farmRoutes);
 //3. Analysis routes
 app.use('/api/v1/analysis', analysisRoutes)
 //4. History and reports

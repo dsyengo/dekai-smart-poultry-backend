@@ -1,9 +1,9 @@
 import Farm from "../models/farmData.js";
 
-// ✅ Add new farm
+//  Add new farm
 export const addFarm = async (req, res) => {
     try {
-        const farmerId = req.user.id; // from auth middleware
+        const farmerId = req.body.userId;
         const existingFarm = await Farm.findOne({ farmerId });
 
         if (existingFarm) {
@@ -23,43 +23,53 @@ export const addFarm = async (req, res) => {
     }
 };
 
-// ✅ Get all farms for logged-in farmer
+//  Get all farms for logged-in farmer
 export const getFarms = async (req, res) => {
     try {
-        const farms = await Farm.find({ farmerId: req.user.id });
+        const farms = await Farm.find({ farmerId: req.body.userId });
         res.status(200).json({ success: true, data: farms });
     } catch (error) {
         res.status(500).json({ success: false, message: "Failed to fetch farms" });
     }
 };
 
-// ✅ Check if farm data is complete
+//  Check if farm data is complete for a specific farm
 export const checkFarmCompletion = async (req, res) => {
     try {
-        const farm = await Farm.findOne({ farmerId: req.user.id });
+        const { farmId } = req.params;
 
-        if (!farm) return res.status(404).json({ message: "No farm found for this user." });
+        // Find the farm by ID and ensure it belongs to the logged-in farmer
+        const farm = await Farm.findOne({ _id: farmId, farmerId: req.body.userId });
+        if (!farm) {
+            return res.status(404).json({ success: true, message: "Farm not found for this user.", isDataFilled: false, });
+        }
 
+        // Minimal required fields to consider data "complete"
         const requiredFields = ["farmName", "county", "poultryType", "birdCount"];
-        const isComplete = requiredFields.every((f) => farm[f]);
+        const isComplete = requiredFields.every(field => farm[field] !== undefined && farm[field] !== null && farm[field] !== "");
 
-        // Update the field if changed
-        if (farm.isDataComplete !== isComplete) {
-            farm.isDataComplete = isComplete;
+        // Update the field if it has changed
+        if (farm.isDataFilled !== isComplete) {
+            farm.isDataFilled = isComplete;
             await farm.save();
         }
 
-        res.status(200).json({ success: true, isDataComplete: farm.isDataComplete });
+        res.status(200).json({
+            success: true,
+            isDataFilled: farm.isDataFilled,
+            message: isComplete ? "Farm data is complete." : "Farm data is incomplete.",
+        });
     } catch (error) {
-        res.status(500).json({ success: false, message: "Error checking farm completion" });
+        console.error("Error checking farm completion:", error.message);
+        res.status(500).json({ success: false, message: "Server error while checking farm completion." });
     }
 };
 
-// ✅ Update farm data
+//  Update farm data
 export const updateFarm = async (req, res) => {
     try {
         const farm = await Farm.findOneAndUpdate(
-            { _id: req.params.id, farmerId: req.user.id },
+            { _id: req.params.id, farmerId: req.body.userId },
             req.body,
             { new: true }
         );
@@ -80,12 +90,12 @@ export const updateFarm = async (req, res) => {
     }
 };
 
-// ✅ Delete farm
+//  Delete farm
 export const deleteFarm = async (req, res) => {
     try {
         const farm = await Farm.findOneAndDelete({
             _id: req.params.id,
-            farmerId: req.user.id,
+            farmerId: req.body.userId,
         });
 
         if (!farm) return res.status(404).json({ message: "Farm not found" });

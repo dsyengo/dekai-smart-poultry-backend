@@ -1,0 +1,27 @@
+{
+  "farmName": "Green Valley Poultry Farm",
+  "county": "Kiambu",
+  "subcounty": "Githunguri",
+  "village": "Kamburu",
+  "gps": {
+    "latitude": -1.045,
+    "longitude": 36.827
+  },
+  "altitude": 1785,
+  "poultryType": "Layers",
+  "birdCount": 500,
+  "averageBirdAgeWeeks": 20,
+  "productionStage": "Layers",
+  "feedType": "Commercial Layer Mash",
+  "mortalityRate": 2.5,
+  "housingType": "Semi-Closed",
+  "biosecurityPractices": [
+    "Footbath disinfection",
+    "Visitor restriction",
+    "Regular vaccination"
+  ],
+  "cleaningFrequency": "Weekly",
+  "litterManagement": "Sawdust changed every 2 weeks",
+  "ventilationQuality": "Good",
+  "isDataFilled": true
+}

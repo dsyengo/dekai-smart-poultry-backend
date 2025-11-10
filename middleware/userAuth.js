@@ -31,7 +31,7 @@ export const userAuth = async (req, res, next) => {
         // ✅ Attach userId from token payload
         req.body.userId = decodeToken.id;
 
-        console.log(req.body.userId)
+        console.log(`User id: ${req.body.userId}`)
 
         next();
     } catch (error) {
