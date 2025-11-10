@@ -3,13 +3,13 @@ import { uploadImage, analyzeImage } from "../services/analysisService.js";
 
 /**
  * @desc Upload image and analyze it
- * @route POST /api/analysis
+ * @route POST /api/v1/analysis
  * @access Private
  */
 export const uploadAndAnalyze = async (req, res) => {
     try {
         const { farmId } = req.body;
-        const farmerId = req.body.userId; // set by your userAuth middleware
+        const farmerId = req.body.userId;
 
         if (!req.file) {
             return res.status(400).json({ success: false, message: "No image uploaded." });
