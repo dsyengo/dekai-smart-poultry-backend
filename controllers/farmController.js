@@ -23,15 +23,21 @@ export const addFarm = async (req, res) => {
     }
 };
 
-//  Get all farms for logged-in farmer
+// Get all farms for logged-in farmer and return count
 export const getFarms = async (req, res) => {
     try {
         const farms = await Farm.find({ farmerId: req.body.userId });
-        res.status(200).json({ success: true, data: farms });
+        const farmCount = farms.length;
+        res.status(200).json({
+            success: true,
+            data: farms,
+            count: farmCount
+        });
     } catch (error) {
         res.status(500).json({ success: false, message: "Failed to fetch farms" });
     }
 };
+
 
 //  Check if farm data is complete for a specific farm
 export const checkFarmCompletion = async (req, res) => {
