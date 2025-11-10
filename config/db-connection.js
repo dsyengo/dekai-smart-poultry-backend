@@ -2,16 +2,19 @@ import mongoose from 'mongoose'
 import dotenv from 'dotenv'
 dotenv.config()
 
-// Get MongoDB URL depending on environment
-const mongoURI =
+// Get MongoDB URI depending on environment
+const MONGO_URI =
     process.env.NODE_ENV === 'production'
-        ? process.env.MONGO_URI   // Online MongoDB (e.g., Atlas)
-        : process.env.MONGO_LOCAL_URI // Local MongoDB
+        ? process.env.MONGO_URI // Online MongoDB for deployment
+        : process.env.MONGO_LOCAL_URI // Local MongoDB for development
 
-mongoose.connect(mongoURI, {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
-})
-    .then(() => console.log('MongoDB connected'))
-    .catch(err => console.error('MongoDB connection error:', err));
-
+export const connectDB = async () => {
+    try {
+        const conn = await mongoose.connect(MONGO_URI, {
+        })
+        console.log(`MongoDB successfully connected to ${conn.connection.host}`)
+    } catch (error) {
+        console.error(`Error: ${error.message}`)
+        process.exit(1)
+    }
+}
