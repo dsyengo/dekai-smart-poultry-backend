@@ -9,6 +9,7 @@ import authRoutes from './routes/authRoutes.js'
 import farmRoutes from './routes/farmRoutes.js'
 import diseaseHistoryRoutes from "./routes/diseaseHistoryRoutes.js";
 import analysisRoutes from './routes/analysisRoutes.js'
+import chatRoutes from './routes/chatbotRoutes.js'
 
 
 dotenv.config()
@@ -47,6 +48,8 @@ app.use("/api/v1/farm", farmRoutes);
 app.use('/api/v1/analysis', analysisRoutes)
 //4. History and reports
 app.use("/api/v1/disease-history", diseaseHistoryRoutes);
+//5. Chatbot
+app.use("/api/v1/chat", chatRoutes)
 
 
 
