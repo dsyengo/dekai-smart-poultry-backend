@@ -1,65 +1,68 @@
+import Chatbot from "../models/chatbot.js";
 import { chatbotResponse } from "../services/chatbotService.js";
-import ChatMessage from "../models/chatbot.js";
 import sanitize from "sanitize-html";
 
 /**
- * @desc Send user message → get AI response → store both in DB
+ * @desc Send user message → get AI response → store both in the active session
  * @route POST /api/chat/send
  */
 export const sendAIMessage = async (req, res) => {
     try {
-        const { message, userId } = req.body;
-        // const  userId  = req.body.userId;
-        console.log(`ChatBOt User id: ${req.body.userId}`)
+        const { userId, message } = req.body;
 
-
-        // 🔒 Validation
-        if (!userId) {
+        if (!userId || !message?.trim()) {
             return res.status(400).json({
                 success: false,
-                message: "User ID is required.",
+                message: "User ID and message are required.",
             });
         }
 
-        if (!message || typeof message !== "string" || message.trim().length === 0) {
-            return res.status(400).json({
-                success: false,
-                message: "Message must be a non-empty string.",
+        // Sanitize message to prevent XSS/injections
+        const sanitizedMessage = sanitize(message, { allowedTags: [], allowedAttributes: {} });
+
+        // Find or create active session for the user
+        let session = await Chatbot.findOne({ userId }).sort({ createdAt: -1 });
+
+        if (!session) {
+            session = new Chatbot({
+                userId,
+                featureType: "chatbot",
+                sessionStart: new Date(),
+                chatbotData: { chatbotFlag: true, conversation: [] },
             });
         }
 
-        // 🧹 Sanitize input to prevent XSS or injections
-        const sanitizedMessage = sanitize(message, {
-            allowedTags: [],
-            allowedAttributes: {},
-        });
-
-        // 💾 Save user message
-        const userChat = new ChatMessage({
-            userId,
+        // Append user's message
+        session.chatbotData.conversation.push({
             role: "user",
             message: sanitizedMessage,
+            timestamp: new Date(),
         });
-        await userChat.save();
 
-        // 🤖 Get AI response from LLM service
+        // Get AI response from Huawei LLM
         const aiReply = await chatbotResponse(sanitizedMessage);
 
-        // 💾 Save assistant's reply
-        const assistantChat = new ChatMessage({
-            userId,
-            role: "assistant",
+        // Append bot response
+        session.chatbotData.conversation.push({
+            role: "bot",
             message: aiReply,
+            timestamp: new Date(),
         });
-        await assistantChat.save();
 
-        // ✅ Send combined response
+        // Update session end and duration
+        session.sessionEnd = new Date();
+        session.duration = Math.floor((session.sessionEnd - session.sessionStart) / 1000);
+
+        // Save updated session
+        await session.save();
+
         res.status(201).json({
             success: true,
             message: "AI response generated successfully.",
             data: {
-                user: sanitizedMessage,
-                assistant: aiReply,
+                userMessage: sanitizedMessage,
+                botResponse: aiReply,
+                sessionId: session._id,
             },
         });
     } catch (error) {
@@ -73,7 +76,7 @@ export const sendAIMessage = async (req, res) => {
 };
 
 /**
- * @desc Get chat history for a user
+ * @desc Get chat history (all sessions) for a user
  * @route GET /api/chat/history?userId=123
  */
 export const getChatHistory = async (req, res) => {
@@ -87,23 +90,19 @@ export const getChatHistory = async (req, res) => {
             });
         }
 
-        // Fetch latest 50 messages sorted (newest first)
-        const chatHistory = await ChatMessage.find({ userId })
-            .sort({ timestamp: -1 })
-            .limit(50);
+        const sessions = await Chatbot.find({ userId }).sort({ createdAt: -1 });
 
-        if (!chatHistory.length) {
+        if (!sessions.length) {
             return res.status(404).json({
                 success: false,
                 message: "No chat history found for this user.",
             });
         }
 
-        // Reverse for chronological order (oldest first)
         res.status(200).json({
             success: true,
             message: "Chat history fetched successfully.",
-            data: chatHistory.reverse(),
+            data: sessions,
         });
     } catch (error) {
         console.error("Error fetching chat history:", error);
@@ -116,7 +115,7 @@ export const getChatHistory = async (req, res) => {
 };
 
 /**
- * @desc Clear all chat messages for a user
+ * @desc Clear all chatbot sessions for a user
  * @route DELETE /api/chat/clear
  */
 export const clearChatHistory = async (req, res) => {
@@ -130,7 +129,7 @@ export const clearChatHistory = async (req, res) => {
             });
         }
 
-        await ChatMessage.deleteMany({ userId });
+        await Chatbot.deleteMany({ userId });
 
         res.status(200).json({
             success: true,

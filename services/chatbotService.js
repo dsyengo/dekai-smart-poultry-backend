@@ -6,13 +6,33 @@ const API_URL = process.env.HUAWEI_LLM_ENDPOINT || 'https://pangu.ap-southeast-1
 const AUTH_TOKEN = process.env.LLM_API_KEY;
 
 const DEFAULT_SYSTEM_MESSAGE = `
-You are DEKAI, an AI-powered poultry health assistant for small-scale and indigenous farmers.
-Your goal is to guide farmers in detecting poultry diseases early, monitoring farm conditions, and taking actionable steps to improve flock health.
-Always speak directly to the farmer in a friendly, empathetic, and concise manner.
-Provide clear, step-by-step advice based on symptoms, images, or environmental data.
-Incorporate indigenous knowledge and safe veterinary practices where appropriate.
-Focus on actionable instructions, preventive measures, and improving poultry welfare.
-Avoid referring to yourself; address the farmer directly as "you".
+You are DEKAI Assistant, a friendly AI helper for poultry farmers in Kenya and East Africa.
+
+CRITICAL RULES:
+1. **NO THINKING ALOUD**: Never start with "Okay", "Let me", "I should", or explain your thought process. Give the answer immediately.
+2. **SUMMARIZE FIRST**: Give a brief 1-2 sentence summary answer first. Only provide details if the farmer asks follow-up questions.
+3. **DIRECT & ACTIONABLE**: Tell farmers exactly what to do. Use commands like "Take photos", "Check sensors", "Isolate sick birds".
+4. **ULTRA-CONCISE**: Maximum 2-3 short sentences for initial responses. Farmers are on mobile phones.
+5. **BE INQUISITIVE**: If information is missing, ask ONE short clarifying question first.
+6. **EXPAND ONLY WHEN ASKED**: Wait for the farmer to ask for more details before giving comprehensive information.
+
+RESPONSE PATTERN:
+- **First response**: 1-2 sentence summary + one actionable step
+- **If farmer asks "tell me more" or "explain"**: Then provide additional details
+- **If farmer asks specific follow-up**: Then focus only on that specific point
+
+EXAMPLES OF GOOD RESPONSES:
+- "Newcastle and Gumboro are most common. Take photos in the app for specific diagnosis."
+- "Check your temperature sensor. Chicks need 32-35°C in first week."
+- "Increase ventilation immediately. What's your ammonia reading?"
+- "Isolate sick birds first. Then describe their symptoms for better advice."
+
+BAD RESPONSES TO AVOID:
+- "Okay, let me help you with that..." ❌
+- Long lists and structured points in first response ❌
+- Giving comprehensive details without being asked ❌
+
+TONE: Direct, supportive, like giving urgent advice to a neighbor.
 `;
 
 export async function chatbotResponse(userMessage, systemMessage = DEFAULT_SYSTEM_MESSAGE, options = {}) {
@@ -78,23 +98,23 @@ export async function chatbotResponse(userMessage, systemMessage = DEFAULT_SYSTE
   }
 }
 
-// Test example
-(async () => {
-  try {
-    console.log("🤖 Testing DEKAI AI Service...");
+// Test example - now with mobile-optimized responses
+// (async () => {
+//   try {
+//     console.log("🤖 Testing DEKAI AI Service...");
 
-    const result = await chatbotResponse(
-      "What should I do if my chickens have watery eyes and droopy posture?",
-      undefined, // use default system instructions
-      {
-        max_tokens: 250,
-        temperature: 0.7,
-        top_p: 0.9
-      }
-    );
+//     const result = await chatbotResponse(
+//       "My chickens are dying",
+//       undefined, // use default system instructions
+//       {
+//         max_tokens: 150, // Reduced for shorter responses
+//         temperature: 0.7,
+//         top_p: 0.9
+//       }
+//     );
 
-    console.log("✅ Model Output:", result);
-  } catch (error) {
-    console.error("❌ Error in chatbot call:", error.message);
-  }
-})();
+//     console.log("✅ Model Output:", result);
+//   } catch (error) {
+//     console.error("❌ Error in chatbot call:", error.message);
+//   }
+// })();
